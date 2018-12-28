@@ -1,0 +1,7 @@
+PROJECT(telnet_server)
+
+SET(SRC_LIST_SERVER telnet_server.cc)
+
+ADD_EXECUTABLE(server ${SRC_LIST_SERVER})
+
+TARGET_LINK_LIBRARIES(server  ${DYNAMIC_LIB})
