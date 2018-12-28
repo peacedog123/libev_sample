@@ -10,8 +10,11 @@ DEFINE_int32(port, 8080, "");
 
 static bool stop = false;
 
-int main() {
-  // TODO google logging
+int main(int argc, char* argv[]) {
+  // 解析命令行参数
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  // 初始化日志库
+  google::InitGoogleLogging(argv[0]);
 
   // server socket
   int fd = socket(PF_INET, SOCK_STREAM, 0);
@@ -46,6 +49,7 @@ int main() {
       continue;
     }
 
+    LOG(ERROR) << "Accept fd: " << sock;
     // TODO else put to queue
   }
 
