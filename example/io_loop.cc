@@ -2,6 +2,8 @@
 
 #include <glog/logging.h>
 
+#include "util.h"
+
 IOLoop::IOLoop() : loop_(ev::AUTO) {
 
 }
@@ -15,21 +17,43 @@ bool IOLoop::StartLoop() {
   async_.start();
 
   // start the thread TODO
-  //thread_ptr_.reset(new Thread(
+  thread_ptr_.reset(new std::thread(&IOLoop::RunLoopThread, this));
+  LOG(WARNING) << "RunLoopThread started...";
   return true;
 }
 
 void IOLoop::AsyncHandler(ev::async& /*watcher*/, int /*revents*/) {
-  // TODO
+  // get the fd vector
+  std::vector<int> fd_vec;
+  {
+    std::lock_guard<std::mutex> guard(mutex_);
+    while (!fd_queue_.empty()) {
+      fd_vec.push_back(fd_queue_.front());
+      fd_queue_.pop_front();
+    }
+  }
 
+  // construct the connection
+  for (const auto fd : fd_vec) {
+    SetNonblocking(fd);
+    int64_t next_id = GetNextId();
+    Connection::Ptr ptr(new Connection(fd, next_id));
+    ptr->EpollRegister(loop_);
+    conn_map_.emplace(next_id, ptr);
+  }
 }
 
 bool IOLoop::RunLoopThread() {
-  // TODO
+  loop_.loop();
+  LOG(WARNING) << "Now exiting the IOLoop...";
   return true;
 }
 
-bool AddNewFD(int fd) {
-  // TODO
+bool IOLoop::AddNewFD(int fd) {
+  {
+    std::lock_guard<std::mutex> guard(mutex_);
+    fd_queue_.push_back(fd);
+  }
+  async_.send();
   return true;
 }
