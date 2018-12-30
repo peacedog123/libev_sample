@@ -1,7 +1,7 @@
-PROJECT(telnet_server)
+PROJECT(echo_server)
 
-SET(SRC_LIST_SERVER telnet_server.cc)
+SET(SRC_LIST_SERVER echo_server.cc server.cc io_loop.cc util.cc connection.cc)
 
-ADD_EXECUTABLE(server ${SRC_LIST_SERVER})
+ADD_EXECUTABLE(echo_server ${SRC_LIST_SERVER})
 
-TARGET_LINK_LIBRARIES(server  ${DYNAMIC_LIB})
+TARGET_LINK_LIBRARIES(echo_server  ${DYNAMIC_LIB})
